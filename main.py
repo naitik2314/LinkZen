@@ -23,11 +23,18 @@ else:
 # Configure the API key (this is correct for google-generativeai package)
 genai.configure(api_key=GEMINI_API_KEY)
 
-# Initialize model
-model = genai.GenerativeModel("gemini-1.5-flash")
+# Configuring the database (local)
+db_file = "links.db"
 
-# Make a simple request
-response = model.generate_content(["How does AI work?"])
-
-# Output the response
-print(response.text)
+def init_db():
+    conn = sqlite3.connect(db_file)
+    cursor = conn.cursor()
+    cursor.execute(
+        '''
+            CREATE TABLE IF NOT EXISTS links (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            url TEXT,
+            category TEXT)
+        ''')
+    conn.commit()
+    conn.close()
