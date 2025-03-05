@@ -50,3 +50,15 @@ def categorize_link(url: str) -> str:
     # Extract the response text (simple, since response.text works directly in Gemini 2.0)
     return response.text.strip()
 
+def add_link(update: Update, context: CallbackContext) -> None:
+    """Handles incoming links"""
+    url = update.message.text.strip()
+    category = categorize_link(url)
+    
+    conn = sqlite3.connect(db_file)
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO links (url, category) VALUES (?, ?)", (url, category))
+    conn.commit()
+    conn.close()
+    
+    update.message.reply_text(f"Link saved under category: {category}")
