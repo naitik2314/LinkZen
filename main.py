@@ -2,9 +2,11 @@ from google import genai
 import sqlite3
 import os
 from telegram import Update
-from telegram.ext import Updater, CommandHandler, MessageHandler, CallbackContext
+from telegram.ext import Application, CommandHandler, MessageHandler, ContextTypes, filters
 from dotenv import load_dotenv
 import sys
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
 
 load_dotenv()
 
@@ -17,8 +19,6 @@ if GEMINI_API_KEY is None:
 elif TELEGRAM_BOT_TOKEN is None:
     print("Telegram API key not found, please refer to the GitHub repo documentation to set up your .env correctly!")
     sys.exit(1)
-else:
-    None
 
 client = genai.Client(api_key=GEMINI_API_KEY)
 
@@ -38,38 +38,58 @@ def init_db():
     conn.commit()
     conn.close()
 
-def categorize_link(url: str) -> str:
-    """Uses Gemini 2.0 Flash API to categorize the link."""
-    # Prompt to ask Gemini to categorize the link
+def sync_categorize_link(url: str) -> str:
+    """This is the sync function that calls Gemini API (blocking)."""
     prompt = f"Categorize this link into a broad category like 'News', 'Technology', 'Entertainment', 'Education', 'E-commerce', etc.: {url}\nCategory:"
-    # Generate the response from Gemini
+    
     response = client.models.generate_content(
         model="gemini-2.0-flash",
         contents=[prompt]
     )
-    # Extract the response text (simple, since response.text works directly in Gemini 2.0)
     return response.text.strip()
 
-def add_link(update: Update, context: CallbackContext) -> None:
+async def categorize_link(url: str) -> str:
+    """Async wrapper around sync Gemini call - future proof for async Telegram bot."""
+    loop = asyncio.get_running_loop()
+    with ThreadPoolExecutor() as pool:
+        return await loop.run_in_executor(pool, sync_categorize_link, url)
+
+async def add_link(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handles incoming links"""
     url = update.message.text.strip()
-    category = categorize_link(url)
-    
+
+    # Get category using async Gemini wrapper
+    category = await categorize_link(url)
+
     conn = sqlite3.connect(db_file)
     cursor = conn.cursor()
     cursor.execute("INSERT INTO links (url, category) VALUES (?, ?)", (url, category))
     conn.commit()
     conn.close()
-    
-    update.message.reply_text(f"Link saved under category: {category}")
 
-def list_links(update: Update, context: CallbackContext) -> None:
+    await update.message.reply_text(f"Link saved under category: {category}")
+
+async def list_links(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Lists stored links"""
     conn = sqlite3.connect(db_file)
     cursor = conn.cursor()
     cursor.execute("SELECT url, category FROM links")
     rows = cursor.fetchall()
     conn.close()
-    
+
     message = "\n".join([f"[{cat}] {url}" for url, cat in rows]) or "No links stored yet."
-    update.message.reply_text(message)
+    await update.message.reply_text(message)
+
+def main():
+    """Main function to start the bot"""
+    init_db()
+
+    application = Application.builder().token(TELEGRAM_BOT_TOKEN).build()
+
+    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, add_link))
+    application.add_handler(CommandHandler("list", list_links))
+
+    application.run_polling()
+
+if __name__ == "__main__":
+    main()

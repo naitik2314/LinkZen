@@ -1,2 +1,4 @@
 .env
 gemini_test.py
+main.py
+links.db
