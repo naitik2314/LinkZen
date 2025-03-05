@@ -62,3 +62,14 @@ def add_link(update: Update, context: CallbackContext) -> None:
     conn.close()
     
     update.message.reply_text(f"Link saved under category: {category}")
+
+def list_links(update: Update, context: CallbackContext) -> None:
+    """Lists stored links"""
+    conn = sqlite3.connect(db_file)
+    cursor = conn.cursor()
+    cursor.execute("SELECT url, category FROM links")
+    rows = cursor.fetchall()
+    conn.close()
+    
+    message = "\n".join([f"[{cat}] {url}" for url, cat in rows]) or "No links stored yet."
+    update.message.reply_text(message)
