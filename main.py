@@ -1,4 +1,4 @@
-import google.generativeai as genai
+from google import genai
 import sqlite3
 import os
 from telegram import Update
@@ -20,8 +20,7 @@ elif TELEGRAM_BOT_TOKEN is None:
 else:
     None
 
-# Configure the API key (this is correct for google-generativeai package)
-genai.configure(api_key=GEMINI_API_KEY)
+client = genai.Client(api_key=GEMINI_API_KEY)
 
 # Configuring the database (local)
 db_file = "links.db"
@@ -38,3 +37,16 @@ def init_db():
         ''')
     conn.commit()
     conn.close()
+
+def categorize_link(url: str) -> str:
+    """Uses Gemini 2.0 Flash API to categorize the link."""
+    # Prompt to ask Gemini to categorize the link
+    prompt = f"Categorize this link into a broad category like 'News', 'Technology', 'Entertainment', 'Education', 'E-commerce', etc.: {url}\nCategory:"
+    # Generate the response from Gemini
+    response = client.models.generate_content(
+        model="gemini-2.0-flash",
+        contents=[prompt]
+    )
+    # Extract the response text (simple, since response.text works directly in Gemini 2.0)
+    return response.text.strip()
+
