@@ -30,26 +30,51 @@ def init_db():
     cursor = conn.cursor()
     cursor.execute(
         '''
-            CREATE TABLE IF NOT EXISTS links (
+        CREATE TABLE IF NOT EXISTS links (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             url TEXT,
-            category TEXT)
+            category TEXT,
+            subcategory TEXT
+        )
         ''')
     conn.commit()
     conn.close()
 
-def sync_categorize_link(url: str) -> str:
-    """This is the sync function that calls Gemini API (blocking)."""
-    prompt = f"Categorize this link into a broad category like 'News', 'Technology', 'Entertainment', 'Education', 'E-commerce', etc.: {url}\nCategory:"
-    
+def sync_categorize_link(url: str) -> tuple:
+    """Blocking call to Gemini for super refined categorization."""
+    prompt = f"""
+    Classify this link into:
+    1. A broad category (News, Technology, Entertainment, Education, Self Help, Health & Nutrition, etc.).
+    2. A refined subcategory that describes the link in more detail (for example, if Self Help, is it about Procrastination, Looksmaxing, or Book Recommendations?)
+
+    Link: {url}
+
+    Return the result as:
+    Broad Category: <broad_category>
+    Subcategory: <subcategory>
+    """
+
     response = client.models.generate_content(
         model="gemini-2.0-flash",
         contents=[prompt]
     )
-    return response.text.strip()
 
-async def categorize_link(url: str) -> str:
-    """Async wrapper around sync Gemini call - future proof for async Telegram bot."""
+    response_text = response.text.strip()
+
+    # Parse the response into category and subcategory
+    broad_category = "Unknown"
+    subcategory = "Unknown"
+
+    for line in response_text.split("\n"):
+        if "Broad Category:" in line:
+            broad_category = line.replace("Broad Category:", "").strip()
+        elif "Subcategory:" in line:
+            subcategory = line.replace("Subcategory:", "").strip()
+
+    return broad_category, subcategory
+
+async def categorize_link(url: str) -> tuple:
+    """Async wrapper to run sync Gemini categorization in thread pool."""
     loop = asyncio.get_running_loop()
     with ThreadPoolExecutor() as pool:
         return await loop.run_in_executor(pool, sync_categorize_link, url)
@@ -58,26 +83,26 @@ async def add_link(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handles incoming links"""
     url = update.message.text.strip()
 
-    # Get category using async Gemini wrapper
-    category = await categorize_link(url)
+    # Fetch broad and subcategory
+    category, subcategory = await categorize_link(url)
 
     conn = sqlite3.connect(db_file)
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO links (url, category) VALUES (?, ?)", (url, category))
+    cursor.execute("INSERT INTO links (url, category, subcategory) VALUES (?, ?, ?)", (url, category, subcategory))
     conn.commit()
     conn.close()
 
-    await update.message.reply_text(f"Link saved under category: {category}")
+    await update.message.reply_text(f"Link saved under category: {category} -> {subcategory}")
 
 async def list_links(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Lists stored links"""
     conn = sqlite3.connect(db_file)
     cursor = conn.cursor()
-    cursor.execute("SELECT url, category FROM links")
+    cursor.execute("SELECT url, category, subcategory FROM links")
     rows = cursor.fetchall()
     conn.close()
 
-    message = "\n".join([f"[{cat}] {url}" for url, cat in rows]) or "No links stored yet."
+    message = "\n".join([f"[{cat} -> {subcat}] {url}" for url, cat, subcat in rows]) or "No links stored yet."
     await update.message.reply_text(message)
 
 def main():
