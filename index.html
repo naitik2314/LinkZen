@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>LinkZen UI</title>
+  <style>
+    /* Global reset and basic styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #141414;
+      color: #ffffff;
+    }
+
+    .container {
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 250px;
+      background-color: #1a1d24;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+    }
+
+    .add-link-btn {
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      padding: 12px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-bottom: 20px;
+      width: 100%;
+      text-align: center;
+    }
+    .add-link-btn:hover {
+      background-color: #0069d9;
+    }
+
+    nav ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    nav li {
+      padding: 10px 0;
+      cursor: pointer;
+      font-weight: 500;
+      color: #c1c1c1;
+    }
+
+    nav li.active,
+    nav li:hover {
+      color: #ffffff;
+    }
+
+    /* Main content area */
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    header {
+      margin-bottom: 20px;
+    }
+
+    #searchInput {
+      width: 100%;
+      padding: 10px;
+      border-radius: 4px;
+      border: none;
+      outline: none;
+      font-size: 14px;
+      background-color: #1f1f1f;
+      color: #ffffff;
+    }
+
+    #searchInput::placeholder {
+      color: #777;
+    }
+
+    #categoryTitle {
+      margin: 10px 0 20px 0;
+      font-size: 24px;
+      font-weight: 600;
+    }
+
+    /* Links container */
+    .links-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 20px;
+    }
+
+    .link-card {
+      background-color: #1f1f1f;
+      padding: 20px;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      min-height: 120px;
+      transition: background-color 0.3s;
+    }
+    .link-card:hover {
+      background-color: #2a2a2a;
+    }
+
+    .link-card .favorite-star {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      cursor: pointer;
+      width: 24px;
+      height: 24px;
+      fill: #555;
+      transition: fill 0.3s;
+    }
+    .link-card .favorite-star.favorited {
+      fill: #fbc02d; /* Gold color for favorited state */
+    }
+
+    .link-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #ffffff;
+      text-decoration: none;
+    }
+    .link-description {
+      font-size: 14px;
+      margin-bottom: 10px;
+      color: #bfbfbf;
+    }
+
+    .tags {
+      margin-top: auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .tag {
+      font-size: 12px;
+      background-color: #2f2f2f;
+      padding: 4px 8px;
+      border-radius: 4px;
+      color: #ffffff;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <button class="add-link-btn" onclick="openAddLinkModal()">Add New Link</button>
+      <nav>
+        <ul>
+          <li class="active" data-filter="all">All Links</li>
+          <li data-filter="favorites">Favorites</li>
+          <li data-filter="recent">Recent</li>
+          <li data-filter="design">Design</li>
+          <li data-filter="articles">Articles</li>
+          <li data-filter="react">React</li>
+          <li data-filter="js">JS</li>
+          <li data-filter="css">CSS</li>
+        </ul>
+      </nav>
+    </aside>
+
+    <!-- Main content -->
+    <main>
+      <header>
+        <input
+          type="text"
+          id="searchInput"
+          placeholder="Search links..."
+          oninput="handleSearch(event)"
+        />
+      </header>
+      <h1 id="categoryTitle">All Links</h1>
+      <div class="links-container" id="linksContainer">
+        <!-- Dynamically inserted link cards -->
+      </div>
+    </main>
+  </div>
+
+  <!-- Add New Link Modal (hidden by default) -->
+  <div
+    id="addLinkModal"
+    style="
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(0, 0, 0, 0.7);
+      justify-content: center;
+      align-items: center;
+    "
+  >
+    <div
+      style="
+        background-color: #1f1f1f;
+        padding: 20px;
+        border-radius: 8px;
+        width: 400px;
+      "
+    >
+      <h2 style="margin-bottom: 10px;">Add New Link</h2>
+      <input
+        type="text"
+        id="newLinkTitle"
+        placeholder="Title"
+        style="
+          width: 100%;
+          padding: 8px;
+          margin-bottom: 10px;
+          border-radius: 4px;
+          border: none;
+          background-color: #2f2f2f;
+          color: #fff;
+        "
+      />
+      <input
+        type="text"
+        id="newLinkUrl"
+        placeholder="URL"
+        style="
+          width: 100%;
+          padding: 8px;
+          margin-bottom: 10px;
+          border-radius: 4px;
+          border: none;
+          background-color: #2f2f2f;
+          color: #fff;
+        "
+      />
+      <input
+        type="text"
+        id="newLinkDescription"
+        placeholder="Description"
+        style="
+          width: 100%;
+          padding: 8px;
+          margin-bottom: 10px;
+          border-radius: 4px;
+          border: none;
+          background-color: #2f2f2f;
+          color: #fff;
+        "
+      />
+      <input
+        type="text"
+        id="newLinkCategory"
+        placeholder="Category (e.g. react, design...)"
+        style="
+          width: 100%;
+          padding: 8px;
+          margin-bottom: 10px;
+          border-radius: 4px;
+          border: none;
+          background-color: #2f2f2f;
+          color: #fff;
+        "
+      />
+      <button
+        onclick="saveNewLink()"
+        style="
+          background-color: #007bff;
+          color: #fff;
+          border: none;
+          border-radius: 4px;
+          padding: 10px 16px;
+          font-size: 14px;
+          cursor: pointer;
+          margin-right: 10px;
+        "
+      >
+        Save
+      </button>
+      <button
+        onclick="closeAddLinkModal()"
+        style="
+          background-color: #555;
+          color: #fff;
+          border: none;
+          border-radius: 4px;
+          padding: 10px 16px;
+          font-size: 14px;
+          cursor: pointer;
+        "
+      >
+        Cancel
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // Sample data. In practice, you'll fetch this from your backend (SQLite + Python).
+    // Each link object:
+    // {
+    //   id: number,
+    //   title: string,
+    //   url: string,
+    //   description: string,
+    //   category: string,  // e.g. "react", "design", etc.
+    //   tags: string[],
+    //   isFavorite: boolean,
+    //   createdAt: Date
+    // }
+    let links = [
+      {
+        id: 1,
+        title: "10 React Performance Optimization Techniques",
+        url: "https://example.com/react-performance",
+        description: "Learn how to optimize your React apps with these top performance tips...",
+        category: "react",
+        tags: ["react", "performance"],
+        isFavorite: false,
+        createdAt: new Date("2023-02-01")
+      },
+      {
+        id: 2,
+        title: "The Complete Guide to Full Stack Development in 2023",
+        url: "https://example.com/full-stack",
+        description: "Full Stack, Web Development, Node, React, and more. Everything you need...",
+        category: "articles",
+        tags: ["fullstack", "web development"],
+        isFavorite: true,
+        createdAt: new Date("2023-01-15")
+      },
+      {
+        id: 3,
+        title: "Mastering TypeScript: Advanced Types and Patterns",
+        url: "https://example.com/ts-advanced",
+        description: "Learn advanced TypeScript patterns to build robust applications...",
+        category: "js",
+        tags: ["typescript", "js"],
+        isFavorite: false,
+        createdAt: new Date("2023-03-02")
+      },
+      {
+        id: 4,
+        title: "State of JavaScript 2023",
+        url: "https://example.com/state-of-js",
+        description: "A comprehensive overview of the JavaScript ecosystem in 2023...",
+        category: "js",
+        tags: ["javascript", "web development"],
+        isFavorite: false,
+        createdAt: new Date("2023-03-10")
+      }
+    ];
+
+    let currentFilter = "all";
+    let searchQuery = "";
+
+    // Once DOM is loaded, render the links
+    window.addEventListener("DOMContentLoaded", () => {
+      renderLinks();
+      setupSidebarFilters();
+    });
+
+    // Renders the link cards based on current filter & search query
+    function renderLinks() {
+      const container = document.getElementById("linksContainer");
+      container.innerHTML = "";
+
+      // Filter & search
+      const filteredLinks = links.filter((link) => {
+        // Filter by category/favorites
+        let categoryMatch = false;
+        if (currentFilter === "all") {
+          categoryMatch = true;
+        } else if (currentFilter === "favorites") {
+          categoryMatch = link.isFavorite;
+        } else if (currentFilter === "recent") {
+          // For demonstration, let's consider "recent" as created within last 30 days
+          const thirtyDaysAgo = new Date();
+          thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+          categoryMatch = link.createdAt >= thirtyDaysAgo;
+        } else {
+          categoryMatch = link.category.toLowerCase() === currentFilter.toLowerCase();
+        }
+
+        // Filter by search query
+        const queryMatch =
+          link.title.toLowerCase().includes(searchQuery) ||
+          link.description.toLowerCase().includes(searchQuery) ||
+          link.tags.some((tag) => tag.toLowerCase().includes(searchQuery));
+
+        return categoryMatch && queryMatch;
+      });
+
+      // Sort "recent" category if needed (e.g. by date descending)
+      if (currentFilter === "recent") {
+        filteredLinks.sort((a, b) => b.createdAt - a.createdAt);
+      }
+
+      // Populate
+      filteredLinks.forEach((link) => {
+        const card = document.createElement("div");
+        card.className = "link-card";
+
+        // Favorite star
+        const star = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        star.setAttribute("viewBox", "0 0 24 24");
+        star.classList.add("favorite-star");
+        if (link.isFavorite) star.classList.add("favorited");
+        star.innerHTML = `
+          <path d="M12 .587l3.668 7.431L24 9.751l-6 5.851 1.417 8.268L12 19.771l-7.417 3.999L6 15.602 0 9.751l8.332-1.733L12 .587z"/>
+        `;
+        star.addEventListener("click", () => toggleFavorite(link.id));
+        card.appendChild(star);
+
+        // Title
+        const linkTitle = document.createElement("a");
+        linkTitle.className = "link-title";
+        linkTitle.href = link.url;
+        linkTitle.target = "_blank";
+        linkTitle.textContent = link.title;
+        card.appendChild(linkTitle);
+
+        // Description
+        const linkDesc = document.createElement("p");
+        linkDesc.className = "link-description";
+        linkDesc.textContent = link.description;
+        card.appendChild(linkDesc);
+
+        // Tags
+        const tagsContainer = document.createElement("div");
+        tagsContainer.className = "tags";
+        link.tags.forEach((tag) => {
+          const tagSpan = document.createElement("span");
+          tagSpan.className = "tag";
+          tagSpan.textContent = tag;
+          tagsContainer.appendChild(tagSpan);
+        });
+        card.appendChild(tagsContainer);
+
+        container.appendChild(card);
+      });
+
+      // Update the title
+      const categoryTitle = document.getElementById("categoryTitle");
+      if (currentFilter === "all") {
+        categoryTitle.textContent = "All Links";
+      } else if (currentFilter === "favorites") {
+        categoryTitle.textContent = "Favorites";
+      } else if (currentFilter === "recent") {
+        categoryTitle.textContent = "Recent";
+      } else {
+        // Capitalize the filter
+        categoryTitle.textContent = currentFilter.charAt(0).toUpperCase() + currentFilter.slice(1);
+      }
+    }
+
+    // Toggle favorite state
+    function toggleFavorite(id) {
+      links = links.map((link) => {
+        if (link.id === id) {
+          return { ...link, isFavorite: !link.isFavorite };
+        }
+        return link;
+      });
+      renderLinks();
+    }
+
+    // Setup sidebar click events
+    function setupSidebarFilters() {
+      const listItems = document.querySelectorAll(".sidebar nav li");
+      listItems.forEach((li) => {
+        li.addEventListener("click", () => {
+          listItems.forEach((item) => item.classList.remove("active"));
+          li.classList.add("active");
+          currentFilter = li.getAttribute("data-filter");
+          renderLinks();
+        });
+      });
+    }
+
+    // Search event
+    function handleSearch(e) {
+      searchQuery = e.target.value.toLowerCase();
+      renderLinks();
+    }
+
+    // Modal controls (Add new link)
+    function openAddLinkModal() {
+      document.getElementById("addLinkModal").style.display = "flex";
+    }
+    function closeAddLinkModal() {
+      document.getElementById("addLinkModal").style.display = "none";
+    }
+    function saveNewLink() {
+      const title = document.getElementById("newLinkTitle").value.trim();
+      const url = document.getElementById("newLinkUrl").value.trim();
+      const description = document.getElementById("newLinkDescription").value.trim();
+      const category = document.getElementById("newLinkCategory").value.trim() || "misc";
+
+      if (!title || !url) {
+        alert("Please provide at least a title and a URL.");
+        return;
+      }
+
+      const newId = links.length > 0 ? Math.max(...links.map((l) => l.id)) + 1 : 1;
+
+      links.push({
+        id: newId,
+        title,
+        url,
+        description,
+        category: category.toLowerCase(),
+        tags: category.split(",").map((t) => t.trim()),
+        isFavorite: false,
+        createdAt: new Date()
+      });
+
+      // Clear fields and close modal
+      document.getElementById("newLinkTitle").value = "";
+      document.getElementById("newLinkUrl").value = "";
+      document.getElementById("newLinkDescription").value = "";
+      document.getElementById("newLinkCategory").value = "";
+      closeAddLinkModal();
+
+      // Re-render
+      renderLinks();
+    }
+  </script>
+</body>
+</html>
