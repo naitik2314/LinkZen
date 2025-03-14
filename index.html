@@ -9,7 +9,9 @@
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
   />
   <style>
-    /* RESET & GLOBAL STYLES */
+    /* ------------------------------
+       RESET & GLOBAL STYLES
+    ------------------------------ */
     * {
       margin: 0;
       padding: 0;
@@ -21,7 +23,7 @@
       color: #fff;
       height: 100vh;
       display: flex;
-      overflow: hidden;
+      overflow: hidden; /* no scroll on body; we’ll scroll in dedicated areas */
     }
     a {
       text-decoration: none;
@@ -33,7 +35,8 @@
     button {
       cursor: pointer;
     }
-    /* Scrollbar styling */
+
+    /* Scrollbar styling (optional) */
     ::-webkit-scrollbar {
       width: 6px;
     }
@@ -44,7 +47,10 @@
     ::-webkit-scrollbar-track {
       background-color: #1a1d24;
     }
-    /* SIDEBAR */
+
+    /* ------------------------------
+       SIDEBAR
+    ------------------------------ */
     .sidebar {
       width: 280px;
       background-color: #1a1d24;
@@ -74,6 +80,7 @@
       font-size: 18px;
       font-weight: 600;
     }
+
     .add-link-btn {
       display: flex;
       align-items: center;
@@ -94,6 +101,7 @@
     .add-link-btn:hover {
       opacity: 0.9;
     }
+
     .sidebar-nav ul {
       padding: 0;
     }
@@ -125,6 +133,8 @@
     .nav-item.active {
       color: #fff;
     }
+
+    /* Tags in sidebar */
     .sidebar-tags {
       margin-top: 40px;
     }
@@ -150,7 +160,10 @@
     .tag:hover {
       background-color: #32363e;
     }
+
+    /* Settings link at bottom */
     .sidebar-settings {
+      margin-top: auto;
       margin-top: 30px;
       display: flex;
       align-items: center;
@@ -165,13 +178,18 @@
     .sidebar-settings:hover {
       color: #fff;
     }
-    /* MAIN AREA */
+
+    /* ------------------------------
+       MAIN AREA
+    ------------------------------ */
     .main {
       flex: 1;
       display: flex;
       flex-direction: column;
       overflow-y: auto;
     }
+
+    /* Top bar with search & icons */
     .topbar {
       display: flex;
       align-items: center;
@@ -218,6 +236,8 @@
     .topbar-icons i:hover {
       color: #fff;
     }
+
+    /* Main content area */
     .main-content {
       padding: 20px;
     }
@@ -241,11 +261,14 @@
       font-size: 14px;
       cursor: pointer;
     }
+
+    /* Links container */
     .links-container {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 20px;
     }
+    /* Link cards */
     .link-card {
       background-color: #1f2127;
       padding: 20px;
@@ -267,7 +290,7 @@
       cursor: pointer;
     }
     .favorite-star.favorited {
-      color: #fbc02d;
+      color: #fbc02d; /* gold for favorites */
     }
     .link-title {
       font-size: 16px;
@@ -293,9 +316,12 @@
       border-radius: 4px;
       color: #fff;
     }
-    /* ADD LINK MODAL */
+
+    /* ------------------------------
+       ADD LINK MODAL
+    ------------------------------ */
     #addLinkModal {
-      display: none;
+      display: none; /* hidden by default */
       position: fixed;
       top: 0;
       left: 0;
@@ -353,36 +379,30 @@
 <body>
   <!-- SIDEBAR -->
   <aside class="sidebar">
+    <!-- Brand -->
     <div class="sidebar-brand">
       <div class="logo">L</div>
       <h2>LinkZen</h2>
     </div>
+
+    <!-- Add Link -->
     <button class="add-link-btn" onclick="openAddLinkModal()">
       <i class="fa fa-plus"></i>
       Add New Link
     </button>
+
+    <!-- Dynamic Navigation (categories) -->
     <div class="sidebar-nav">
-      <ul>
-        <li class="nav-item active">
-          <i class="fa fa-folder"></i>
-          All Links
-          <span class="count">0</span>
-        </li>
-        <li class="nav-item">
-          <i class="fa fa-folder"></i>
-          Favorites
-          <span class="count">0</span>
-        </li>
-        <li class="nav-item">
-          <i class="fa fa-folder"></i>
-          Recent
-          <span class="count">0</span>
-        </li>
+      <ul id="sidebarCategories">
+        <!-- Will be populated by JS -->
       </ul>
     </div>
+
+    <!-- Tags -->
     <div class="sidebar-tags">
       <h3>Tags</h3>
       <div class="tags-list">
+        <!-- You can keep these hardcoded or populate them dynamically if you prefer -->
         <span class="tag">JavaScript</span>
         <span class="tag">React</span>
         <span class="tag">UI</span>
@@ -390,7 +410,9 @@
         <span class="tag">CSS</span>
       </div>
     </div>
-    <div class="sidebar-settings">
+
+    <!-- Settings -->
+    <div class="sidebar-settings" style="margin-top: 30px;">
       <i class="fa fa-cog"></i>
       <span>Settings</span>
     </div>
@@ -398,28 +420,37 @@
 
   <!-- MAIN AREA -->
   <div class="main">
+    <!-- Top bar -->
     <div class="topbar">
+      <!-- Search -->
       <div class="search-wrapper">
         <i class="fa fa-search"></i>
-        <input type="text" id="searchInput" placeholder="Search links..." />
+        <input
+          type="text"
+          id="searchInput"
+          placeholder="Search links..."
+        />
       </div>
+      <!-- Icons on right -->
       <div class="topbar-icons">
         <i class="fa fa-bell"></i>
         <i class="fa fa-moon"></i>
         <i class="fa fa-user-circle"></i>
       </div>
     </div>
+
+    <!-- Main content area -->
     <div class="main-content">
       <div class="content-header">
-        <h1>All Links</h1>
+        <h1 id="currentCategory">All Links</h1>
         <select id="sortSelect">
-          <option value="recent">Recently Added</option>
+          <option value="recent" selected>Recently Added</option>
           <option value="alphabetical">Alphabetical</option>
-          <option value="favoriteFirst">Favorites First</option>
         </select>
       </div>
+
       <div class="links-container" id="linksContainer">
-        <!-- Link cards will be dynamically inserted here -->
+        <!-- Cards will be inserted dynamically -->
       </div>
     </div>
   </div>
@@ -428,7 +459,12 @@
   <div id="addLinkModal">
     <div class="modal-content">
       <h2>Add New Link</h2>
-      <input type="text" id="newLinkUrl" placeholder="Paste your link here..." />
+      <!-- Only link input, as categorization is done in backend -->
+      <input
+        type="text"
+        id="newLinkUrl"
+        placeholder="Paste your link here..."
+      />
       <div class="modal-buttons">
         <button onclick="saveNewLink()">Save</button>
         <button class="cancel-btn" onclick="closeAddLinkModal()">Cancel</button>
@@ -437,70 +473,221 @@
   </div>
 
   <script>
-    // Modal controls
-    function openAddLinkModal() {
-      document.getElementById("addLinkModal").style.display = "flex";
+    /***************************************************************
+     *         CONFIGURATION / GLOBALS
+     ***************************************************************/
+    const API_BASE = "http://localhost:8000"; // Adjust if needed
+
+    // We'll store all fetched links here
+    let allLinks = [];
+
+    // Track the current view (sidebar selection)
+    // e.g. "all", "favorites", "recent", or a category name like "Development"
+    let currentView = "all";
+
+    // Predefine categories for the sidebar
+    // You can adjust or add more categories as you like
+    const categories = [
+      { key: "all", label: "All Links" },
+      { key: "favorites", label: "Favorites" },
+      { key: "recent", label: "Recent" },
+      { key: "Development", label: "Development" },
+      { key: "Design", label: "Design" },
+      { key: "Productivity", label: "Productivity" },
+      { key: "Articles", label: "Articles" },
+    ];
+
+    /***************************************************************
+     *         LOADING AND DISPLAYING LINKS
+     ***************************************************************/
+    function loadLinks() {
+      const sortValue = document.getElementById("sortSelect").value; // 'recent' or 'alphabetical'
+      fetch(`${API_BASE}/links?sort=${sortValue}`)
+        .then(response => response.json())
+        .then(links => {
+          allLinks = links;
+          updateSidebarCounts(links);
+          displayLinksForView(currentView);
+        })
+        .catch(error => console.error("Error loading links:", error));
     }
-    function closeAddLinkModal() {
-      document.getElementById("addLinkModal").style.display = "none";
+
+    function displayLinksForView(view) {
+      const container = document.getElementById("linksContainer");
+      container.innerHTML = "";
+
+      // Start with all links
+      let filtered = [...allLinks];
+
+      // Filter based on the view
+      if (view === "favorites") {
+        filtered = filtered.filter(link => link.favorite);
+      } else if (view === "recent") {
+        // For simplicity, let's just take the first 10 from the sorted list
+        filtered = filtered.slice(0, 10);
+      } else if (view !== "all") {
+        // Otherwise, treat it as a category name
+        filtered = filtered.filter(link => link.category === view);
+      }
+
+      // Apply a simple search filter if there's text in #searchInput
+      const searchTerm = document.getElementById("searchInput").value.trim().toLowerCase();
+      if (searchTerm) {
+        filtered = filtered.filter(link => link.url.toLowerCase().includes(searchTerm));
+      }
+
+      // Now render each link as a card
+      filtered.forEach(link => {
+        const card = document.createElement("div");
+        card.className = "link-card";
+
+        // Determine the star class for favorites
+        const starClass = link.favorite ? "fa-star favorited" : "fa-star";
+
+        card.innerHTML = `
+          <i class="fa ${starClass} favorite-star" data-id="${link.id}"></i>
+          <h2 class="link-title">${link.url}</h2>
+          <p class="link-description">
+            Category: ${link.category} -> ${link.subcategory}
+          </p>
+        `;
+        container.appendChild(card);
+      });
+
+      // Attach event listeners to the favorite stars
+      document.querySelectorAll(".favorite-star").forEach(star => {
+        star.addEventListener("click", () => {
+          const linkId = star.getAttribute("data-id");
+          toggleFavorite(linkId);
+        });
+      });
     }
-    // Save new link via API
+
+    /***************************************************************
+     *         TOGGLE FAVORITE
+     ***************************************************************/
+    function toggleFavorite(linkId) {
+      fetch(`${API_BASE}/links/${linkId}/favorite`, {
+        method: "PATCH",
+      })
+        .then(response => response.json())
+        .then(data => {
+          // Update local array
+          const index = allLinks.findIndex(l => l.id == linkId);
+          if (index !== -1) {
+            allLinks[index].favorite = data.favorite;
+          }
+          displayLinksForView(currentView);
+          updateSidebarCounts(allLinks);
+        })
+        .catch(error => console.error("Error toggling favorite:", error));
+    }
+
+    /***************************************************************
+     *         SIDEBAR COUNTS (ALL, FAVORITES, RECENT, ETC.)
+     ***************************************************************/
+    function updateSidebarCounts(links) {
+      const allCount = links.length;
+      const favCount = links.filter(l => l.favorite).length;
+      // For "recent," let's define it as up to 10 links
+      const recentCount = Math.min(allCount, 10);
+
+      // Tally up categories
+      const categoryCounts = {};
+      links.forEach(link => {
+        categoryCounts[link.category] = (categoryCounts[link.category] || 0) + 1;
+      });
+
+      // Build the sidebar items
+      const sidebar = document.getElementById("sidebarCategories");
+      sidebar.innerHTML = "";
+
+      categories.forEach(cat => {
+        let count = 0;
+        if (cat.key === "all") count = allCount;
+        else if (cat.key === "favorites") count = favCount;
+        else if (cat.key === "recent") count = recentCount;
+        else count = categoryCounts[cat.key] || 0;
+
+        const li = document.createElement("li");
+        li.className = "nav-item";
+        li.innerHTML = `
+          <i class="fa fa-folder"></i>
+          ${cat.label}
+          <span class="count">${count}</span>
+        `;
+        li.addEventListener("click", () => {
+          // Clear active on all nav-items
+          document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
+          li.classList.add("active");
+
+          currentView = cat.key; // e.g. 'favorites', 'Development'
+          document.getElementById("currentCategory").textContent = cat.label;
+          displayLinksForView(currentView);
+        });
+        sidebar.appendChild(li);
+      });
+
+      // Make the first item ("All Links") active if none are active
+      const firstItem = sidebar.querySelector(".nav-item");
+      if (firstItem && !document.querySelector(".nav-item.active")) {
+        firstItem.classList.add("active");
+      }
+    }
+
+    /***************************************************************
+     *         ADDING A NEW LINK
+     ***************************************************************/
     function saveNewLink() {
       const linkValue = document.getElementById("newLinkUrl").value.trim();
       if (!linkValue) {
         alert("Please provide a link.");
         return;
       }
-      fetch("http://localhost:8000/links", {
+      fetch(`${API_BASE}/links`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: linkValue })
       })
-      .then(response => response.json())
-      .then(data => {
-        alert(`Link saved under category: ${data.category} -> ${data.subcategory}`);
-        document.getElementById("newLinkUrl").value = "";
-        closeAddLinkModal();
-        loadLinks();
-      })
-      .catch(error => {
-        console.error("Error saving link:", error);
-        alert("An error occurred while saving the link.");
-      });
-    }
-    // Load links from the API and display them
-    function loadLinks() {
-      fetch("http://localhost:8000/links")
         .then(response => response.json())
-        .then(links => {
-          const container = document.getElementById("linksContainer");
-          container.innerHTML = "";
-          links.forEach(link => {
-            const card = document.createElement("div");
-            card.className = "link-card";
-            card.innerHTML = `
-              <h2 class="link-title">${link.url}</h2>
-              <p class="link-description">Category: ${link.category} -> ${link.subcategory}</p>
-            `;
-            container.appendChild(card);
-          });
+        .then(data => {
+          alert(`Link saved under category: ${data.category} -> ${data.subcategory}`);
+          document.getElementById("newLinkUrl").value = "";
+          closeAddLinkModal();
+          loadLinks(); // Refresh the list
         })
-        .catch(error => console.error("Error loading links:", error));
+        .catch(error => {
+          console.error("Error saving link:", error);
+          alert("An error occurred while saving the link.");
+        });
     }
-    // Load links on page load
-    document.addEventListener("DOMContentLoaded", loadLinks);
-    
-    // Sidebar nav highlighting
-    const navItems = document.querySelectorAll(".nav-item");
-    navItems.forEach((item) => {
-      item.addEventListener("click", () => {
-        navItems.forEach((i) => i.classList.remove("active"));
-        item.classList.add("active");
-        const heading = document.querySelector(".content-header h1");
-        heading.textContent = item.innerText.replace(/\d+/, "").trim();
-      });
+
+    /***************************************************************
+     *         MODAL CONTROLS
+     ***************************************************************/
+    function openAddLinkModal() {
+      document.getElementById("addLinkModal").style.display = "flex";
+    }
+    function closeAddLinkModal() {
+      document.getElementById("addLinkModal").style.display = "none";
+    }
+
+    /***************************************************************
+     *         SEARCH & SORT
+     ***************************************************************/
+    document.getElementById("searchInput").addEventListener("input", () => {
+      displayLinksForView(currentView);
+    });
+
+    document.getElementById("sortSelect").addEventListener("change", () => {
+      loadLinks();
+    });
+
+    /***************************************************************
+     *         INITIAL LOAD
+     ***************************************************************/
+    document.addEventListener("DOMContentLoaded", () => {
+      loadLinks();
     });
   </script>
 </body>

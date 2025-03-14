@@ -29,14 +29,16 @@ def init_db():
     conn = sqlite3.connect(db_file)
     cursor = conn.cursor()
     cursor.execute(
-        '''
+        """
         CREATE TABLE IF NOT EXISTS links (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             url TEXT,
             category TEXT,
-            subcategory TEXT
+            subcategory TEXT,
+            favorite INTEGER DEFAULT 0,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )
-        ''')
+        """)
     conn.commit()
     conn.close()
 
