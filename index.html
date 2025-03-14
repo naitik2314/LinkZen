@@ -9,9 +9,7 @@
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
   />
   <style>
-    /* ------------------------------
-       RESET & GLOBAL STYLES
-    ------------------------------ */
+    /* RESET & GLOBAL STYLES */
     * {
       margin: 0;
       padding: 0;
@@ -23,7 +21,7 @@
       color: #fff;
       height: 100vh;
       display: flex;
-      overflow: hidden; /* no scroll on body; we’ll scroll in dedicated areas */
+      overflow: hidden;
     }
     a {
       text-decoration: none;
@@ -35,8 +33,7 @@
     button {
       cursor: pointer;
     }
-
-    /* Scrollbar styling (optional) */
+    /* Scrollbar styling */
     ::-webkit-scrollbar {
       width: 6px;
     }
@@ -47,10 +44,7 @@
     ::-webkit-scrollbar-track {
       background-color: #1a1d24;
     }
-
-    /* ------------------------------
-       SIDEBAR
-    ------------------------------ */
+    /* SIDEBAR */
     .sidebar {
       width: 280px;
       background-color: #1a1d24;
@@ -80,7 +74,6 @@
       font-size: 18px;
       font-weight: 600;
     }
-
     .add-link-btn {
       display: flex;
       align-items: center;
@@ -101,7 +94,6 @@
     .add-link-btn:hover {
       opacity: 0.9;
     }
-
     .sidebar-nav ul {
       padding: 0;
     }
@@ -133,8 +125,6 @@
     .nav-item.active {
       color: #fff;
     }
-
-    /* Tags in sidebar */
     .sidebar-tags {
       margin-top: 40px;
     }
@@ -160,10 +150,7 @@
     .tag:hover {
       background-color: #32363e;
     }
-
-    /* Settings link at bottom */
     .sidebar-settings {
-      margin-top: auto;
       margin-top: 30px;
       display: flex;
       align-items: center;
@@ -178,18 +165,13 @@
     .sidebar-settings:hover {
       color: #fff;
     }
-
-    /* ------------------------------
-       MAIN AREA
-    ------------------------------ */
+    /* MAIN AREA */
     .main {
       flex: 1;
       display: flex;
       flex-direction: column;
       overflow-y: auto;
     }
-
-    /* Top bar with search & icons */
     .topbar {
       display: flex;
       align-items: center;
@@ -236,8 +218,6 @@
     .topbar-icons i:hover {
       color: #fff;
     }
-
-    /* Main content area */
     .main-content {
       padding: 20px;
     }
@@ -261,14 +241,11 @@
       font-size: 14px;
       cursor: pointer;
     }
-
-    /* Links container */
     .links-container {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 20px;
     }
-    /* Link cards */
     .link-card {
       background-color: #1f2127;
       padding: 20px;
@@ -290,7 +267,7 @@
       cursor: pointer;
     }
     .favorite-star.favorited {
-      color: #fbc02d; /* gold for favorites */
+      color: #fbc02d;
     }
     .link-title {
       font-size: 16px;
@@ -316,12 +293,9 @@
       border-radius: 4px;
       color: #fff;
     }
-
-    /* ------------------------------
-       ADD LINK MODAL
-    ------------------------------ */
+    /* ADD LINK MODAL */
     #addLinkModal {
-      display: none; /* hidden by default */
+      display: none;
       position: fixed;
       top: 0;
       left: 0;
@@ -379,60 +353,33 @@
 <body>
   <!-- SIDEBAR -->
   <aside class="sidebar">
-    <!-- Brand -->
     <div class="sidebar-brand">
       <div class="logo">L</div>
       <h2>LinkZen</h2>
     </div>
-
-    <!-- Add Link -->
     <button class="add-link-btn" onclick="openAddLinkModal()">
       <i class="fa fa-plus"></i>
       Add New Link
     </button>
-
-    <!-- Navigation -->
     <div class="sidebar-nav">
       <ul>
         <li class="nav-item active">
           <i class="fa fa-folder"></i>
           All Links
-          <span class="count">126</span>
+          <span class="count">0</span>
         </li>
         <li class="nav-item">
           <i class="fa fa-folder"></i>
           Favorites
-          <span class="count">24</span>
+          <span class="count">0</span>
         </li>
         <li class="nav-item">
           <i class="fa fa-folder"></i>
           Recent
-          <span class="count">47</span>
-        </li>
-        <li class="nav-item">
-          <i class="fa fa-folder"></i>
-          Development
-          <span class="count">38</span>
-        </li>
-        <li class="nav-item">
-          <i class="fa fa-folder"></i>
-          Design
-          <span class="count">29</span>
-        </li>
-        <li class="nav-item">
-          <i class="fa fa-folder"></i>
-          Productivity
-          <span class="count">16</span>
-        </li>
-        <li class="nav-item">
-          <i class="fa fa-folder"></i>
-          Articles
-          <span class="count">43</span>
+          <span class="count">0</span>
         </li>
       </ul>
     </div>
-
-    <!-- Tags -->
     <div class="sidebar-tags">
       <h3>Tags</h3>
       <div class="tags-list">
@@ -443,9 +390,7 @@
         <span class="tag">CSS</span>
       </div>
     </div>
-
-    <!-- Settings -->
-    <div class="sidebar-settings" style="margin-top: 30px;">
+    <div class="sidebar-settings">
       <i class="fa fa-cog"></i>
       <span>Settings</span>
     </div>
@@ -453,26 +398,17 @@
 
   <!-- MAIN AREA -->
   <div class="main">
-    <!-- Top bar -->
     <div class="topbar">
-      <!-- Search -->
       <div class="search-wrapper">
         <i class="fa fa-search"></i>
-        <input
-          type="text"
-          id="searchInput"
-          placeholder="Search links..."
-        />
+        <input type="text" id="searchInput" placeholder="Search links..." />
       </div>
-      <!-- Icons on right -->
       <div class="topbar-icons">
         <i class="fa fa-bell"></i>
         <i class="fa fa-moon"></i>
         <i class="fa fa-user-circle"></i>
       </div>
     </div>
-
-    <!-- Main content area -->
     <div class="main-content">
       <div class="content-header">
         <h1>All Links</h1>
@@ -482,56 +418,8 @@
           <option value="favoriteFirst">Favorites First</option>
         </select>
       </div>
-
       <div class="links-container" id="linksContainer">
-        <!-- Example link cards -->
-        <div class="link-card">
-          <i class="fa fa-star favorite-star"></i>
-          <h2 class="link-title">10 React Performance Optimization Techniques</h2>
-          <p class="link-description">
-            Learn how to optimize your React apps with these top performance tips...
-          </p>
-          <div class="tags">
-            <span class="tag">React</span>
-            <span class="tag">Performance</span>
-          </div>
-        </div>
-
-        <div class="link-card">
-          <i class="fa fa-star favorite-star favorited"></i>
-          <h2 class="link-title">The Complete Guide to Full Stack Development in 2023</h2>
-          <p class="link-description">
-            A comprehensive overview of modern full-stack development...
-          </p>
-          <div class="tags">
-            <span class="tag">JavaScript</span>
-            <span class="tag">Web Dev</span>
-          </div>
-        </div>
-
-        <div class="link-card">
-          <i class="fa fa-star favorite-star"></i>
-          <h2 class="link-title">Mastering TypeScript: Advanced Types and Patterns</h2>
-          <p class="link-description">
-            Deep dive into generics, conditional types, and more advanced TypeScript features.
-          </p>
-          <div class="tags">
-            <span class="tag">TypeScript</span>
-            <span class="tag">Programming</span>
-          </div>
-        </div>
-
-        <div class="link-card">
-          <i class="fa fa-star favorite-star"></i>
-          <h2 class="link-title">State of JavaScript 2023</h2>
-          <p class="link-description">
-            An annual survey results showcasing the latest trends, popular libraries, and insights.
-          </p>
-          <div class="tags">
-            <span class="tag">JavaScript</span>
-            <span class="tag">Trends</span>
-          </div>
-        </div>
+        <!-- Link cards will be dynamically inserted here -->
       </div>
     </div>
   </div>
@@ -540,12 +428,7 @@
   <div id="addLinkModal">
     <div class="modal-content">
       <h2>Add New Link</h2>
-      <!-- Only link input, as categorization is done in backend -->
-      <input
-        type="text"
-        id="newLinkUrl"
-        placeholder="Paste your link here..."
-      />
+      <input type="text" id="newLinkUrl" placeholder="Paste your link here..." />
       <div class="modal-buttons">
         <button onclick="saveNewLink()">Save</button>
         <button class="cancel-btn" onclick="closeAddLinkModal()">Cancel</button>
@@ -554,11 +437,6 @@
   </div>
 
   <script>
-    /* 
-      For now, this is a static UI. We'll add real functionality 
-      (like fetching data, saving links, toggling favorites, etc.) later.
-    */
-
     // Modal controls
     function openAddLinkModal() {
       document.getElementById("addLinkModal").style.display = "flex";
@@ -566,26 +444,62 @@
     function closeAddLinkModal() {
       document.getElementById("addLinkModal").style.display = "none";
     }
+    // Save new link via API
     function saveNewLink() {
       const linkValue = document.getElementById("newLinkUrl").value.trim();
       if (!linkValue) {
         alert("Please provide a link.");
         return;
       }
-      alert(`Link "${linkValue}" saved! (Backend logic to be implemented)`);
-      document.getElementById("newLinkUrl").value = "";
-      closeAddLinkModal();
+      fetch("http://localhost:8000/links", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ url: linkValue })
+      })
+      .then(response => response.json())
+      .then(data => {
+        alert(`Link saved under category: ${data.category} -> ${data.subcategory}`);
+        document.getElementById("newLinkUrl").value = "";
+        closeAddLinkModal();
+        loadLinks();
+      })
+      .catch(error => {
+        console.error("Error saving link:", error);
+        alert("An error occurred while saving the link.");
+      });
     }
-
+    // Load links from the API and display them
+    function loadLinks() {
+      fetch("http://localhost:8000/links")
+        .then(response => response.json())
+        .then(links => {
+          const container = document.getElementById("linksContainer");
+          container.innerHTML = "";
+          links.forEach(link => {
+            const card = document.createElement("div");
+            card.className = "link-card";
+            card.innerHTML = `
+              <h2 class="link-title">${link.url}</h2>
+              <p class="link-description">Category: ${link.category} -> ${link.subcategory}</p>
+            `;
+            container.appendChild(card);
+          });
+        })
+        .catch(error => console.error("Error loading links:", error));
+    }
+    // Load links on page load
+    document.addEventListener("DOMContentLoaded", loadLinks);
+    
     // Sidebar nav highlighting
     const navItems = document.querySelectorAll(".nav-item");
     navItems.forEach((item) => {
       item.addEventListener("click", () => {
         navItems.forEach((i) => i.classList.remove("active"));
         item.classList.add("active");
-        // Update the heading to the clicked item’s text
         const heading = document.querySelector(".content-header h1");
-        heading.textContent = item.innerText.replace(/\d+/, "").trim(); 
+        heading.textContent = item.innerText.replace(/\d+/, "").trim();
       });
     });
   </script>
