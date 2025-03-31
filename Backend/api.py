@@ -10,7 +10,6 @@ load_dotenv()
 db_file = "links.db"
 app = FastAPI(title="Link API")
 
-# Allow CORS for the frontend (adjust origins as needed)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -24,7 +23,7 @@ async def get_links():
     def fetch_links():
         conn = sqlite3.connect(db_file)
         cursor = conn.cursor()
-        cursor.execute("SELECT id, url, category, subcategory, favorite, created_at FROM links")
+        cursor.execute("SELECT id, url, category, subcategory, favorite, created_at, short_description, description FROM links")
         rows = cursor.fetchall()
         conn.close()
         return rows
@@ -42,7 +41,9 @@ async def get_links():
             "category": row[2],
             "subcategory": row[3],
             "isFavorite": bool(row[4]),
-            "createdAt": row[5]
+            "createdAt": row[5],
+            "short_description": row[6],
+            "description": row[7]
         })
     return links
 
