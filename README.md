@@ -222,6 +222,5 @@ This project is licensed under the MIT License. See the LICENSE file for details
 - **FastAPI:** For providing a modern, fast web framework.
 - **Vite:** For enabling a fast and modern development experience for the frontend.
 - **Telegram Bot API:** For making bot integrations straightforward.
-- **Magic Patterns:** For the design inspiration and initial frontend template.
 
 By following these instructions, you can set up, run, and extend LinkZen on your local machine. Enjoy managing your links seamlessly!
